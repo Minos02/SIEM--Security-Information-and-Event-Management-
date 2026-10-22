@@ -1,0 +1,29 @@
+<!-- Added to /var/ossec/etc/ossec.conf, inside <ossec_config> -->
+
+<command>
+  <name>netsh-win</name>
+  <executable>netsh.exe</executable>
+  <timeout_allowed>yes</timeout_allowed>
+</command>
+
+<active-response>
+  <disabled>no</disabled>
+  <command>netsh-win</command>
+  <location>all</location>
+  <rules_id>100100</rules_id>
+  <timeout>300</timeout>
+</active-response>
+
+<!--
+  KNOWN LIMITATION (documented, not yet resolved):
+  This Active Response fails with "Cannot read 'srcip' from data" when the
+  Windows agent uses the modern 'eventchannel' log_format. The attacker IP is
+  present under data.win.eventdata.ipAddress, but netsh.exe / route-null.exe
+  only read the generic 'srcip' field, which is only populated by Wazuh's
+  built-in decoders when the agent uses the legacy 'eventlog' log_format.
+
+  Planned fix: reconfigure the agent's <localfile> block for the Security
+  channel to use <log_format>eventlog</log_format> instead of
+  <log_format>eventchannel</log_format>, or write a custom Active Response
+  script that reads data.win.eventdata.ipAddress directly.
+-->
